@@ -934,24 +934,24 @@ nav {
 
 .carousel-wrapper {
     width: 100%;
-    overflow: visible; /* Permet le débordement du hover */
+    overflow: hidden;
     mask: linear-gradient(90deg, transparent, white 15%, white 85%, transparent);
     -webkit-mask: linear-gradient(90deg, transparent, white 15%, white 85%, transparent);
-    padding: 20px 0; /* Espace pour le hover */
-    margin: -20px 0; /* Compense le padding */
+    padding: 20px 0;
 }
 
 .carousel-track {
     display: flex;
-    animation: scroll 30s linear infinite;
-    width: fit-content;
+    gap: 2rem;
+    width: max-content;
+    animation: carousel-scroll var(--carousel-duration, 30s) linear infinite;
+    will-change: transform;
 }
 
 .carousel-item {
     flex-shrink: 0;
     width: 200px;
     height: 200px;
-    margin: 0 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -962,24 +962,6 @@ nav {
     transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-}
-
-.carousel-item:hover {
-    transform: translateY(-10px) scale(1.05);
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-}
-
-.carousel-item:hover img {
-    width: 120px;
-    height: 120px;
-    margin-bottom: 0;
-}
-
-.carousel-item:hover p {
-    opacity: 0;
-    transform: translateY(10px);
 }
 
 .carousel-item img {
@@ -1001,12 +983,36 @@ nav {
     transition: all 0.3s ease;
 }
 
-@keyframes scroll {
+@media (hover: hover) and (pointer: fine) {
+    .carousel-track:hover {
+        animation-play-state: paused;
+    }
+
+    .carousel-item:hover {
+        transform: translateY(-10px) scale(1.05);
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .carousel-item:hover img {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 0;
+    }
+
+    .carousel-item:hover p {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
+
+@keyframes carousel-scroll {
     0% {
         transform: translateX(0);
     }
     100% {
-        transform: translateX(-50%);
+        transform: translateX(calc(-1 * var(--carousel-cycle-width, 50%)));
     }
 }
 
@@ -1017,10 +1023,13 @@ nav {
         margin-bottom: 1rem;
     }
     
+    .carousel-track {
+        gap: 1rem;
+    }
+
     .carousel-item {
         width: 150px;
         height: 150px;
-        margin: 0 1rem;
     }
     
     .carousel-item img {
@@ -1030,6 +1039,12 @@ nav {
     
     .carousel-item p {
         font-size: 0.9rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .carousel-track {
+        animation: none;
     }
 }
 

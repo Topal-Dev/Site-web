@@ -10,6 +10,7 @@ class PortfolioApp {
         this.initFadeAnimations();
         this.initLoadingScreen();
         this.initMobileMenu();
+        this.initUpcomingCarousel();
 
         Logger.log('✅ Portfolio App initialized');
     }
@@ -170,6 +171,62 @@ class PortfolioApp {
         document.querySelectorAll('.dropdown.open').forEach(d => {
             d.classList.remove('open');
         });
+    }
+
+    // Carrousel "Nos projets à venir" : duplication auto pour boucle réellement continue
+    initUpcomingCarousel() {
+        const wrapper = document.querySelector('.carousel-wrapper');
+        const track = document.querySelector('.carousel-track');
+        if (!wrapper || !track) return;
+
+        const sourceItems = Array.from(track.children).map(item => item.cloneNode(true));
+        if (sourceItems.length === 0) return;
+
+        const clearTrack = () => {
+            while (track.firstChild) {
+                track.removeChild(track.firstChild);
+            }
+        };
+
+        const buildCarousel = () => {
+            clearTrack();
+
+            sourceItems.forEach(item => track.appendChild(item.cloneNode(true)));
+
+            // On vise au moins 3 largeurs d'écran pour éviter tout trou visuel.
+            const minTrackWidth = wrapper.clientWidth * 3;
+            let safety = 0;
+            while (track.scrollWidth < minTrackWidth && safety < 20) {
+                sourceItems.forEach(item => track.appendChild(item.cloneNode(true)));
+                safety += 1;
+            }
+
+            const computedStyle = window.getComputedStyle(track);
+            const gap = parseFloat(computedStyle.gap || computedStyle.columnGap || '0');
+            const firstItem = track.children[0];
+            if (!firstItem) return;
+
+            const itemWidth = firstItem.getBoundingClientRect().width;
+            const sourceCount = sourceItems.length;
+            const cycleWidth = (itemWidth * sourceCount) + (gap * Math.max(0, sourceCount - 1));
+
+            // Vitesse constante pour garder une animation lisible.
+            const pixelsPerSecond = 45;
+            const duration = Math.max(18, cycleWidth / pixelsPerSecond);
+
+            track.style.setProperty('--carousel-cycle-width', `${Math.round(cycleWidth)}px`);
+            track.style.setProperty('--carousel-duration', `${duration}s`);
+        };
+
+        buildCarousel();
+
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            if (resizeTimer) {
+                clearTimeout(resizeTimer);
+            }
+            resizeTimer = setTimeout(buildCarousel, 150);
+        }, { passive: true });
     }
 }
 
